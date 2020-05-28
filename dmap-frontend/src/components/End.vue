@@ -33,7 +33,12 @@
         >
           <v-icon small>arrow_downward</v-icon><span class="ml-1">Download DMP</span>
         </v-btn>
-
+        <v-btn
+          small
+          @click="pushDmptoRepository"
+        >
+          <v-icon small>arrow_upward</v-icon><span class="ml-1">Upload to Invenio</span>
+        </v-btn>
         <v-btn
           small
           @click="submitToFunder"
@@ -69,6 +74,7 @@
 <script>
 import { saveAs } from 'file-saver'
 import { mapActions } from 'vuex'
+import BackendService from '@/services/BackendService.js'
 
 export default {
   name: 'End',
@@ -95,6 +101,88 @@ export default {
           let blob = new Blob([JSON.stringify(dmp, null, 2)], { type: 'application/json;charset=utf-8' })
           saveAs(blob, 'rda-common-dmp.json')
         })
+      }
+    },
+    pushDmptoRepository() {
+      //Pushing the DMP to repository
+      if(confirm('Do you want to push the record to the repository?')) {
+        console.log('confirmed action')
+        if (this.selectedExportType.key === 'rda-dmp-common') {
+        this.constructRdaDmpCommonStandard().then(dmp => {
+          console.log(dmp.dmp)
+          let theJson = {
+                      "_access": {
+                          "metadata_restricted": false,
+                          "files_restricted": false
+                      },
+                      "_owners": [1],
+                      "_created_by": 1,
+                      "access_right": "open",
+                      "resource_type": {
+                          "type": "publication",
+                          "subtype": "publication-datamanagementplan"
+                      },
+                      "identifiers": {
+                          "DOI": "10.9999/rdm.9999999",
+                          "arXiv": "9999.99999",
+                          "dmp_id": dmp.dmp.dmp_id.identifier
+                      },
+                      "creators": [	
+                          {
+                              "name": "Julio Cesar",	
+                              "type": "Personal",
+                              "given_name": "Julio",
+                              "family_name": "Cesar",
+                              "identifiers": {
+                                  "Orcid": "9999-9999-9999-9999"
+                              },
+                              "affiliations": [
+                                  {
+                                      "name": "Entity One",
+                                      "identifier": "entity-one",
+                                      "scheme": "entity-id-scheme"
+                                  }
+                              ]
+                          }
+                      ],
+                      "titles": [			
+                          {
+                              "title": dmp.dmp.title, 
+                              "type": "Other",		
+                              "lang": "eng"
+                          }
+                      ],
+                      "descriptions": [
+                          {
+                              "description": dmp.dmp.description, 
+                              "type": "Abstract",
+                              "lang": "eng"
+                          }
+                      ],
+                      "community": {	
+                          "primary": "Maincom",
+                          "secondary": ["Subcom One", "Subcom Two"]
+                      },
+                      "licenses": [
+                          {
+                              "license": dmp.dmp.dataset[0].distribution[0].license[0].name,
+                              "uri": dmp.dmp.dataset[0].distribution[0].license[0].license_ref,
+                              "identifier": dmp.dmp.dataset[0].distribution[0].license[0].name,
+                              "scheme": dmp.dmp.dataset[0].distribution[0].license[0].name
+                          }
+                      ]
+                  }
+
+                  console.log(theJson)
+                  BackendService.sendToRepository(theJson)
+                  .then(response => {
+                      console.log(response)
+                  })
+                  .catch(error => {
+                      console.log(error)
+                  })
+        })
+      }
       }
     },
     submitToFunder () {
