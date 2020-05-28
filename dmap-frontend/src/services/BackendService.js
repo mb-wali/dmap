@@ -12,6 +12,17 @@ const apiClient = axios.create({
   timeout: 30000
 })
 
+const repoClient = axios.create({
+  baseURL: 'https://invenio-test.tugraz.at/api',
+  withCredentials: false,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    "Access-Control-Allow-Origin": "*"
+  },
+  timeout: 10000
+})
+
 apiClient.interceptors.request.use(config => {
   store.dispatch('loading/startLoading')
   return config
@@ -43,6 +54,10 @@ const cancellableGetFactory = () => {
 const repositorySuggestionCall = cancellableGetFactory()
 
 export default {
+  sendToRepository(dmp) {
+    console.log('sending...')
+    return repoClient.post('/records/', dmp)
+  },
   getDmps () {
     return apiClient.get('/dmp')
   },
