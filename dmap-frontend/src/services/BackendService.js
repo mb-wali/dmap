@@ -13,7 +13,8 @@ const apiClient = axios.create({
 })
 
 const repoClient = axios.create({
-  baseURL: 'https://invenio-test.tugraz.at/api',
+  // baseURL: 'https://invenio-test.tugraz.at/api',
+  baseURL: 'https://localhost:5000/api',
   withCredentials: false,
   headers: {
     Accept: 'application/json',
@@ -56,6 +57,7 @@ const repositorySuggestionCall = cancellableGetFactory()
 export default {
   sendToRepository(dmp) {
     console.log('sending...')
+    console.log("dmp is ", dmp)
     return repoClient.post('/records/', dmp)
   },
   getDmps () {

@@ -35,6 +35,9 @@
         </template>
         <template slot="expand" slot-scope="props">
           <ProjectPreview v-for="project in props.item.researchProjects" :key="project.id" :project="project"/>
+              <v-btn small @click="pushtorep(props)">
+              <v-icon small>arrow_upward</v-icon><span class="ml-1">Save to repository</span>
+              </v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -45,6 +48,7 @@
 import store from '@/store/store'
 import { mapState } from 'vuex'
 import ProjectPreview from '@/components/ProjectPreview.vue'
+import BackendService from '@/services/BackendService.js'
 
 function getDmps (routeTo, next) {
   store.dispatch('dmp/fetchDmps')
@@ -69,6 +73,82 @@ export default {
       ]
     }
   },
+  methods: {
+    pushtorep(props) {
+      let obj = props.item
+      let theJson = {
+                      "_access": {
+                          "metadata_restricted": false,
+                          "files_restricted": false
+                      },
+                      "_owners": [obj.contactPerson.id],
+                      "_created_by": obj.contactPerson.id,
+                      "access_right": "open",
+                      "resource_type": {
+                          "type": "publication",
+                          "subtype": "publication-datamanagementplan"
+                      },
+                      "identifiers": {
+                          "DOI": "10.9999/rdm.9999999",
+                          "arXiv": "9999.99999",
+                          "dmp_id": obj.id
+                      },
+                      "creators": [	
+                          {
+                              "name": obj.contactPerson.firstName + " " + obj.contactPerson.lastName,	
+                              "type": "Personal",
+                              "given_name": obj.contactPerson.firstName,
+                              "family_name": obj.contactPerson.lastName,
+                              "identifiers": {
+                                  "Orcid": "9999-9999-9999-9999"
+                              },
+                              "affiliations": [
+                                  {
+                                      "name": "Entity One",
+                                      "identifier": "entity-one",
+                                      "scheme": "entity-id-scheme"
+                                  }
+                              ]
+                          }
+                      ],
+                      "titles": [			
+                          {
+                              "title": obj.researchProjects[0].title, 
+                              "type": "Other",		
+                              "lang": "eng"
+                          }
+                      ],
+                      "descriptions": [
+                          {
+                              "description": obj.researchProjects[0].description, 
+                              "type": "Abstract",
+                              "lang": "eng"
+                          }
+                      ],
+                      "community": {	
+                          "primary": "Maincom",
+                          "secondary": ["Subcom One", "Subcom Two"]
+                      },
+                      "licenses": [
+                        {
+                          "license": "Berkeley Software Distribution 3",
+                          "uri": "https://opensource.org/licenses/BSD-3-Clause",
+                          "identifier": "BSD-3",
+                          "scheme": "BSD-3"
+                        }
+                      ]
+                  }
+                  BackendService.sendToRepository(theJson)
+                  .then(response => {
+                      console.log(response)
+                  })
+                  .catch(error => {
+                      console.log(error)
+                  })
+
+    }
+  },
+
   beforeRouteEnter (routeTo, routeFrom, next) {
     getDmps(routeTo, next)
   },
@@ -79,6 +159,8 @@ export default {
     ...mapState(['dmp'])
   }
 }
+
+
 </script>
 
 <style scoped>
