@@ -140,6 +140,7 @@ export default {
                   }
                   BackendService.sendToRepository(theJson)
                   .then(response => {
+                      alert("status: " + response.statusTest + " link: " + response.data.links.self)
                       console.log(response)
                   })
                   .catch(error => {
